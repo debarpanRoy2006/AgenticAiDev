@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic AI Development Assistant</title>
+    <!-- Bootstrap CSS CDN (Integrity attribute FIXED) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, #e0f2fe, #bfdbfe); /* Light blue gradient background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2.5rem 1.5rem;
+            box-sizing: border-box;
+        }
+        .main-wrapper { /* New wrapper for main content + sidebar */
+            display: flex;
+            width: 100%;
+            max-width: 1200px; /* Increased max-width for sidebar */
+            gap: 2.5rem;
+            flex-direction: row; /* Default side-by-side */
+            align-items: flex-start;
+        }
+        .container-custom { /* Custom class for main content container */
+            background-color: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            flex-grow: 1; /* Allows main content to take available space */
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        .sidebar { /* New sidebar styles */
+            background-color: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 300px; /* Fixed width for sidebar */
+            flex-shrink: 0; /* Prevent sidebar from shrinking */
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        .sidebar h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 1rem;
+        }
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: calc(100vh - 200px); /* Adjust based on overall layout */
+            overflow-y: auto;
+        }
+        .history-list-item {
+            background-color: #f0f4f8;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            font-weight: 500;
+            color: #334155;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            border: 1px solid #dbeafe;
+        }
+        .history-list-item:hover {
+            background-color: #e2e8f0;
+            transform: translateY(-1px);
+        }
+        .history-list-item.active {
+            background-color: #6366f1; /* Active item color */
+            color: white;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #1a202c;
+            text-align: center;
+            line-height: 1.1;
+            letter-spacing: -0.025em;
+        }
+        label {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        .form-control-custom { /* Custom class for textarea/file input */
+            border: 1px solid #cbd5e0;
+            border-radius: 1rem;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            color: #2d3748;
+            transition: all 0.2s ease-in-out;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.4);
+        }
+        .action-button {
+            font-weight: 700;
+            padding: 0.9rem 1.8rem;
+            border-radius: 1.25rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background-size: 200% auto;
+            color: white;
+            border: none;
+        }
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            background-position: right center;
+        }
+        .action-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Specific button colors and gradients */
+        #code-gen-btn { background-image: linear-gradient(to right, #4f46e5 0%, #6366f1 50%, #4f46e5 100%); }
+        #debug-btn { background-image: linear-gradient(to right, #10b981 0%, #34d399 50%, #10b981 100%); }
+        #git-op-btn { background-image: linear-gradient(to right, #8b5cf6 0%, #a78bfa 50%, #8b5cf6 100%); }
+        #analyze-file-btn { background-image: linear-gradient(to right, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%); }
+        #generate-ideas-btn { background-image: linear-gradient(to right, #ef4444 0%, #f87171 50%, #ef4444 100%); }
+        #general-ai-btn { background-image: linear-gradient(to right, #0d6efd 0%, #6daffc 50%, #0d6efd 100%); } /* Bootstrap primary blue */
+        .modal-generate-ideas-btn { background-image: linear-gradient(to right, #28a745 0%, #2ecc71 50%, #28a745 100%); } /* Green for modal button */
+
+
+        .loading-spinner {
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #6366f1;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+        .history-entry { /* Used for main result area when loading history */
+            background-color: #f0f4f8;
+            border: 1px solid #dbeafe;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .history-entry strong {
+            color: #475569;
+        }
+        .history-entry pre {
+            background-color: #eef2f7;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 0.6rem;
+            margin-top: 0.6rem;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .ideas-list {
+            list-style: none;
+            padding: 0;
+        }
+        .idea-item {
+            background-color: #eef2f7;
+            border: 1px solid #dbeafe;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem;
+            color: #2d3748;
+        }
+        .idea-item .copy-btn {
+            background-color: #6c757d; /* Bootstrap secondary */
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .idea-item .copy-btn:hover {
+            background-color: #5a6268;
+        }
+        .message-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #28a745; /* Green for success */
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .message-box.show {
+            display: block;
+            opacity: 1;
+        }
+
+
+        /* --- Media Queries for Responsiveness --- */
+
+        /* Small devices (phones, 576px and below) */
+        @media (max-width: 575.98px) {
+            body {
+                padding: 1rem;
+            }
+            .main-wrapper {
+                flex-direction: column; /* Stack sidebar and main content */
+                gap: 1.5rem;
+            }
+            .container-custom {
+                padding: 1.5rem;
+                border-radius: 1.5rem;
+                width: 100%; /* Full width */
+                max-width: 100%;
+            }
+            .sidebar { /* Sidebar hidden by default on mobile, shown in navbar collapse */
+                display: none !important; /* Hide desktop sidebar on mobile */
+            }
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 1.5rem;
+            }
+            .sidebar h2 {
+                font-size: 1.5rem;
+                margin-bottom: 0.75rem;
+            }
+            .history-list {
+                max-height: 150px; /* Smaller max-height for history on mobile */
+            }
+            .action-buttons {
+                flex-direction: column; /* Stack buttons vertically */
+                gap: 0.75rem;
+            }
+            .action-button {
+                width: 100%;
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+            label {
+                font-size: 1rem;
+            }
+            .form-control-custom {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+            pre {
+                padding: 1rem;
+                font-size: 0.8rem;
+            }
+            .history-entry, .idea-item {
+                padding: 0.75rem;
+                margin-bottom: 0.5rem;
+                font-size: 0.9rem;
+            }
+            .history-entry pre, .idea-item .copy-btn {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Medium devices (tablets, 576px to 991.98px) */
+        @media (min-width: 576px) and (max-width: 991.98px) {
+            body {
+                padding: 2rem;
+            }
+            .main-wrapper {
+                flex-direction: column; /* Stack sidebar and main content */
+                gap: 2rem;
+            }
+            .container-custom {
+                padding: 2rem;
+                border-radius: 1.75rem;
+                width: 100%; /* Full width */
+                max-width: 100%;
+            }
+            .sidebar { /* Sidebar hidden by default on tablet, shown in navbar collapse */
+                display: none !important; /* Hide desktop sidebar on tablet */
+            }
+            h1 {
+                font-size: 3rem;
+                margin-bottom: 2rem;
+            }
+            .sidebar h2 {
+                font-size: 1.6rem;
+                margin-bottom: 1rem;
+            }
+            .history-list {
+                max-height: 250px; /* Moderate max-height for history on tablets */
+            }
+            .action-buttons {
+                gap: 1rem; /* Slightly more space between buttons */
+            }
+            .action-button {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.95rem;
+            }
+            label {
+                font-size: 1.05rem;
+            }
+            .form-control-custom {
+                padding: 0.9rem 1.1rem;
+                font-size: 0.95rem;
+            }
+            pre {
+                padding: 1.2rem;
+                font-size: 0.9rem;
+            }
+            .history-entry, .idea-item {
+                padding: 0.9rem;
+                margin-bottom: 0.6rem;
+            }
+            .history-entry pre, .idea-item .copy-btn {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Large devices (desktops, 992px and up) - Base styles already cover this */
+        @media (min-width: 992px) {
+            .main-wrapper {
+                flex-direction: row; /* Side-by-side layout */
+                margin-top: 0 !important; /* Remove top margin from navbar */
+            }
+            .sidebar {
+                display: flex !important; /* Show desktop sidebar */
+                width: 300px; /* Fixed width */
+            }
+            .history-list {
+                max-height: calc(100vh - 200px); /* Adjust based on overall layout */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar for mobile view -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light w-100 position-fixed top-0 start-0 d-lg-none" style="z-index: 100;">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Dev Assistant</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav flex-column w-100">
+                    <li class="nav-item">
+                        <h2 class="text-center mt-3 mb-2">Past Conversations</h2>
+                        <ul id="history-list-sidebar-mobile" class="history-list">
+                            <p class="text-muted text-center">No history yet.</p>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-wrapper mt-lg-0 mt-5"> <!-- Adjusted margin-top for fixed navbar -->
+        <!-- Sidebar for History (Desktop View) -->
+        <div class="sidebar d-none d-lg-flex"> <!-- Hidden on small/medium, shown on large -->
+            <h2 class="text-center">Past Conversations</h2>
+            <ul id="history-list-sidebar-desktop" class="history-list">
+                <p class="text-muted text-center">No history yet.</p>
+            </ul>
+        </div>
+
+        <!-- Main Content Container -->
+        <div class="container-custom">
+            <h1 class="mb-8">Agentic AI Dev Assistant</h1>
+
+            <div class="input-section">
+                <label for="prompt-input" class="form-label mb-3">Enter your request:</label>
+                <textarea id="prompt-input" rows="7" class="form-control form-control-custom w-100" placeholder="e.g., 'Generate a Python function to calculate factorial', 'Debug this JavaScript code: function add(a,b){return a+b', 'Commit changes to main branch with message: Initial commit'"></textarea>
+            </div>
+
+            <div class="file-upload-section mt-4 mb-6">
+                <label for="file-input" class="form-label mb-3">Upload a file (optional):</label>
+                <input type="file" id="file-input" class="form-control form-control-custom w-100">
+                <p class="text-muted mt-2">Max file size: 2MB. Supported types: .txt, .py, .js, .html, .css, .json, .md</p>
+            </div>
+
+            <div class="action-buttons d-flex flex-wrap justify-content-center gap-4 mb-8">
+                <button id="code-gen-btn" class="action-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 4l-4 4 4 4" />
+                    </svg>
+                    Generate Code
+                </button>
+                <button id="debug-btn" class="action-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Debug Code
+                </button>
+                <button id="git-op-btn" class="action-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Git Operation
+                </button>
+                <button id="analyze-file-btn" class="action-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 2v-6m2 9H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Analyze File
+                </button>
+                <button id="open-ideas-modal-btn" class="action-button"> <!-- This button now opens the modal -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4.343 19.657l.707-.707M17 12a5 5 0 11-10 0 5 5 0 0110 0z" />
+                    </svg>
+                    Generate Ideas
+                </button>
+                <button id="general-ai-btn" class="action-button"> <!-- New General Purpose AI button -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    General AI
+                </button>
+            </div>
+
+            <div id="loading-indicator" class="loading-spinner mx-auto mb-4"></div>
+
+            <div class="output-section">
+                <h2 class="h4 fw-semibold text-dark mb-3">Result:</h2>
+                <pre id="result-output" class="p-3 bg-light rounded-3 border text-dark"></pre>
+                <div id="error-message" class="text-danger fw-medium mt-2 d-none"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box"></div>
+
+    <!-- Generate Ideas Modal -->
+    <div class="modal fade" id="generateIdeasModal" tabindex="-1" aria-labelledby="generateIdeasModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="generateIdeasModalLabel">Blog Post Idea Generator</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-3">Enter some keywords or topics to get AI-powered blog post ideas.</p>
+                    <div class="mb-3">
+                        <label for="ideas-keywords-input" class="form-label">Keywords:</label>
+                        <input type="text" class="form-control form-control-custom" id="ideas-keywords-input" placeholder="e.g., eco park, sustainable living, AI in education">
+                    </div>
+                    <div id="ideas-loading-spinner" class="loading-spinner mx-auto my-4"></div>
+                    <h6 class="fw-semibold text-dark mb-2">Generated Ideas:</h6>
+                    <!-- HTML for the General AI Modal (Place this near the other modals in index.html) -->
+<div class="modal fade" id="generalAiModal" tabindex="-1" aria-labelledby="generalAiModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="generalAiModalLabel">General Purpose AI Chat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="general-ai-chat-output" class="mb-3">
+                    <!-- Chat messages will appear here -->
+                    <p class="text-muted text-center">Ask me anything! (No code generation here)</p>
+                </div>
+                <div class="input-group">
+                    <input type="text" class="form-control form-control-custom" id="general-ai-input" placeholder="Type your message...">
+                    <button class="btn btn-primary modal-general-ai-send-btn" id="general-ai-send-btn">Send</button>
+                </div>
+                <div id="general-ai-loading-spinner" class="loading-spinner mx-auto my-2"></div>
+                <div id="general-ai-error-message" class="text-danger fw-medium mt-2 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Relevant part of the action-buttons div (from index.html body) -->
+<button id="open-general-ai-modal-btn" class="action-button">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    General AI
+</button>
+
+                    <div id="generated-ideas-output" class="border rounded-3 p-3 bg-light" style="min-height: 100px; max-height: 300px; overflow-y: auto;">
+                        <p class="text-muted text-center">Ideas will appear here.</p>
+                    </div>
+                    <div id="ideas-error-message" class="text-danger fw-medium mt-2 d-none"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="modal-generate-ideas-btn" class="action-button modal-generate-ideas-btn">Generate Ideas</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Bootstrap JS CDN (Integrity attribute FIXED) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        const promptInput = document.getElementById('prompt-input');
+        const fileInput = document.getElementById('file-input');
+        const codeGenBtn = document.getElementById('code-gen-btn');
+        const debugBtn = document.getElementById('debug-btn');
+        const gitOpBtn = document.getElementById('git-op-btn');
+        const analyzeFileBtn = document.getElementById('analyze-file-btn');
+        const openIdeasModalBtn = document.getElementById('open-ideas-modal-btn'); // Button to open modal
+        const generalAiBtn = document.getElementById('general-ai-btn'); // New General AI button
+        const modalGenerateIdeasBtn = document.getElementById('modal-generate-ideas-btn'); // Button inside modal
+        const ideasKeywordsInput = document.getElementById('ideas-keywords-input'); // Input inside modal
+        const generatedIdeasOutput = document.getElementById('generated-ideas-output'); // Output inside modal
+        const ideasLoadingSpinner = document.getElementById('ideas-loading-spinner'); // Spinner inside modal
+        const ideasErrorMessage = document.getElementById('ideas-error-message'); // Error message inside modal
+
+        const resultOutput = document.getElementById('result-output');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const errorMessage = document.getElementById('error-message');
+        const historyListSidebarDesktop = document.getElementById('history-list-sidebar-desktop');
+        const historyListSidebarMobile = document.getElementById('history-list-sidebar-mobile');
+        const messageBox = document.getElementById('message-box');
+
+        let fullHistoryData = [];
+
+        const BACKEND_URL = 'http://127.0.0.1:8000/api/agent/';
+        const HISTORY_URL = 'http://127.0.0.1:8000/api/history/';
+        const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+        const ALLOWED_FILE_TYPES = [
+            'text/plain', 'application/x-python', 'text/x-python', 'application/javascript',
+            'text/javascript', 'text/html', 'text/css', 'application/json', 'text/markdown'
+        ];
+
+        // Bootstrap Modal Instance
+        const generateIdeasModal = new bootstrap.Modal(document.getElementById('generateIdeasModal'));
+
+
+        function showMessage(message, type = 'success') {
+            messageBox.textContent = message;
+            messageBox.className = 'message-box show';
+            if (type === 'success') {
+                messageBox.style.backgroundColor = '#28a745';
+            } else {
+                messageBox.style.backgroundColor = '#dc3545';
+            }
+
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000);
+        }
+
+        function copyToClipboard(text) {
+            if (document.execCommand) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showMessage('Copied to clipboard!');
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    showMessage('Failed to copy!', 'error');
+                }
+                document.body.removeChild(textarea);
+            } else {
+                showMessage('Clipboard copy not supported in this browser.', 'error');
+            }
+        }
+
+        async function fetchHistory() {
+            try {
+                const response = await fetch(HISTORY_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                fullHistoryData = data.history;
+                renderHistorySidebar(historyListSidebarDesktop, data.history);
+                renderHistorySidebar(historyListSidebarMobile, data.history);
+            } catch (error) {
+                console.error('Error fetching history:', error);
+                errorMessage.textContent = `Error loading history: ${error.message}`;
+                errorMessage.classList.remove('d-none');
+            }
+        }
+
+        function renderHistorySidebar(targetElement, history) {
+            targetElement.innerHTML = '';
+            if (history.length === 0) {
+                targetElement.innerHTML = '<p class="text-muted text-center">No history yet.</p>';
+                return;
+            }
+
+            history.forEach((entry, index) => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('history-list-item');
+                listItem.dataset.index = index;
+
+                let displayTopic = entry.prompt.substring(0, 50);
+                if (entry.prompt.length > 50) displayTopic += '...';
+                if (!displayTopic) displayTopic = `[${entry.action_type.replace(/_/g, ' ')}]`;
+
+                listItem.textContent = displayTopic;
+
+                listItem.addEventListener('click', () => loadHistoryEntry(index));
+                targetElement.appendChild(listItem);
+            });
+            targetElement.scrollTop = targetElement.scrollHeight;
+        }
+
+        function loadHistoryEntry(index) {
+            const entry = fullHistoryData[index];
+            if (!entry) return;
+
+            document.querySelectorAll('.history-list-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelectorAll(`.history-list-item[data-index="${index}"]`).forEach(item => {
+                item.classList.add('active');
+            });
+
+            promptInput.value = entry.prompt;
+            fileInput.value = ''; // Clear file input when loading history
+
+            if (entry.action_type === 'generate_ideas') {
+                try {
+                    const ideas = JSON.parse(entry.result);
+                    renderIdeas(ideas, resultOutput); // Render ideas in main result area
+                } catch (e) {
+                    resultOutput.innerHTML = `<p class="text-danger">Error parsing ideas: ${e.message}</p><pre>${entry.result}</pre>`;
+                }
+            } else {
+                resultOutput.textContent = entry.result;
+            }
+            errorMessage.classList.add('d-none');
+            
+            // Close mobile navbar if open
+            const navbarCollapse = document.getElementById('navbarNav');
+            if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) {
+                    bsCollapse.hide();
+                }
+            }
+        }
+
+        function renderIdeas(ideas, targetElement) {
+            let ideasHtml = '<ul class="ideas-list">';
+            if (ideas && ideas.length > 0) {
+                ideas.forEach(idea => {
+                    ideasHtml += `
+                        <li class="idea-item">
+                            <span>${idea}</span>
+                            <button class="copy-btn" data-idea="${idea}">Copy</button>
+                        </li>
+                    `;
+                });
+            } else {
+                ideasHtml += '<p class="text-muted text-center">No ideas generated or ideas could not be parsed.</p>';
+            }
+            ideasHtml += '</ul>';
+            targetElement.innerHTML = ideasHtml;
+
+            targetElement.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    copyToClipboard(event.target.dataset.idea);
+                });
+            });
+        }
+
+
+        async function sendRequest(actionType, promptText, targetOutputElement, loadingElement, errorElement) {
+            const prompt = promptText.trim();
+            const file = fileInput.files[0]; // Only main file input is used for file uploads
+
+            // Specific validation for ideas modal vs main input
+            if (actionType === 'generate_ideas') {
+                if (!prompt) {
+                    errorElement.textContent = 'Please enter a prompt for idea generation.';
+                    errorElement.classList.remove('d-none');
+                    return;
+                }
+            } else { // For other actions (code, debug, git, analyze, general_ai)
+                if (!prompt && !file) {
+                    errorElement.textContent = 'Please enter a prompt or upload a file.';
+                    errorElement.classList.remove('d-none');
+                    return;
+                }
+            }
+
+            if (file && actionType !== 'generate_ideas' && actionType !== 'general_ai') { // Only validate file for code/debug/git/analyze
+                if (file.size > MAX_FILE_SIZE) {
+                    errorElement.textContent = 'File size exceeds 2MB limit.';
+                    errorElement.classList.remove('d-none');
+                    return;
+                }
+                const isAllowedType = ALLOWED_FILE_TYPES.includes(file.type);
+                const isAllowedExtension = ['.txt', '.py', '.js', '.html', '.css', '.json', '.md'].some(ext => file.name.toLowerCase().endsWith(ext));
+
+                if (!isAllowedType && !isAllowedExtension) {
+                    errorElement.textContent = 'Unsupported file type. Please upload .txt, .py, .js, .html, .css, .json, or .md files.';
+                    errorMessage.classList.remove('d-none');
+                    return;
+                }
+            }
+
+            targetOutputElement.innerHTML = ''; // Clear previous output
+            errorElement.classList.add('d-none');
+            loadingElement.style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('action_type', actionType);
+            formData.append('prompt', prompt);
+            if (file && actionType !== 'generate_ideas' && actionType !== 'general_ai') { // Only send file for relevant actions
+                formData.append('uploaded_file', file);
+            }
+
+            try {
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Something went wrong on the server.');
+                }
+
+                const data = await response.json();
+                
+                if (actionType === 'generate_ideas') {
+                    try {
+                        const ideas = JSON.parse(data.result);
+                        renderIdeas(ideas, targetOutputElement); // Render ideas in the specified target
+                    } catch (e) {
+                        targetOutputElement.innerHTML = `<p class="text-danger">Error parsing ideas: ${e.message}</p><pre>${data.result}</pre>`;
+                    }
+                } else {
+                    targetOutputElement.textContent = data.result || 'No result received.';
+                }
+
+                if (actionType !== 'generate_ideas') { // Only clear main inputs for non-modal actions
+                    promptInput.value = '';
+                    fileInput.value = '';
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                errorElement.textContent = `Error: ${error.message}`;
+                errorElement.classList.remove('d-none');
+                targetOutputElement.textContent = '';
+            } finally {
+                loadingElement.style.display = 'none';
+                fetchHistory(); // Always refresh history
+            }
+        }
+
+        // Event listeners for main buttons
+        codeGenBtn.addEventListener('click', () => sendRequest('code_generation', promptInput.value, resultOutput, loadingIndicator, errorMessage));
+        debugBtn.addEventListener('click', () => sendRequest('debugging', promptInput.value, resultOutput, loadingIndicator, errorMessage));
+        gitOpBtn.addEventListener('click', () => sendRequest('git_operation', promptInput.value, resultOutput, loadingIndicator, errorMessage));
+        analyzeFileBtn.addEventListener('click', () => sendRequest('analyze_file', promptInput.value, resultOutput, loadingIndicator, errorMessage));
+        generalAiBtn.addEventListener('click', () => sendRequest('general_ai', promptInput.value, resultOutput, loadingIndicator, errorMessage)); // New General AI listener
+        
+        // Event listener for opening the ideas modal
+        openIdeasModalBtn.addEventListener('click', () => {
+            ideasKeywordsInput.value = ''; // Clear input on modal open
+            generatedIdeasOutput.innerHTML = '<p class="text-muted text-center">Ideas will appear here.</p>'; // Clear output
+            ideasErrorMessage.classList.add('d-none'); // Clear errors
+            generateIdeasModal.show(); // Show the modal
+        });
+
+        // Event listener for the generate ideas button INSIDE the modal
+        modalGenerateIdeasBtn.addEventListener('click', () => {
+            // Call sendRequest with modal-specific elements
+            sendRequest('generate_ideas', ideasKeywordsInput.value, generatedIdeasOutput, ideasLoadingSpinner, ideasErrorMessage);
+        });
+
+
+        document.addEventListener('DOMContentLoaded', fetchHistory);
+        
+    </script>
+</body>
+</html>
