@@ -78,30 +78,37 @@ class AgentCore:
             print(f"An unexpected error occurred: {e}")
             return f"An unexpected error occurred: {e}"
 
-    def planning_module(self, prompt, file_content=None):
-        """
-        MCP Component: Planning Module
-        Uses LLM to understand the user's intent and break it down into an actionable plan.
-        Now also considers file content if provided.
-        """
-        prompt_lower = prompt.lower()
-        # Prioritize General AI if keywords match, to avoid accidental code generation
-        if "general ai" in prompt_lower or "what is" in prompt_lower or "explain" in prompt_lower or "tell me about" in prompt_lower or "define" in prompt_lower:
-            return {"action_type": "general_ai", "task_description": prompt, "file_content": file_content}
-        elif "generate code" in prompt_lower or "write code" in prompt_lower or "code for" in prompt_lower:
-            return {"action_type": "code_generation", "task_description": prompt, "file_content": file_content}
-        elif "debug" in prompt_lower or "fix this code" in prompt_lower or "error in" in prompt_lower:
-            return {"action_type": "debugging", "task_description": prompt, "file_content": file_content}
-        elif "git" in prompt_lower or "commit" in prompt_lower or "push" in prompt_lower or "pull" in prompt_lower:
-            return {"action_type": "git_operation", "task_description": prompt, "file_content": file_content}
-        elif "analyze file" in prompt_lower or "summarize file" in prompt_lower or file_content:
-            return {"action_type": "analyze_file", "task_description": prompt, "file_content": file_content}
-        elif "generate ideas" in prompt_lower or "ideas for" in prompt_lower or "brainstorm" in prompt_lower:
-            return {"action_type": "generate_ideas", "task_description": prompt, "file_content": file_content}
-        else:
-            # Default to general_ai for non-specific prompts, rather than code_generation
-            return {"action_type": "general_ai", "task_description": prompt, "file_content": file_content}
+    def planning_module(self, prompt, file_content=None, file_data=None, file_type=None):
+            """
+            MCP Component: Planning Module
+            Determines action based on prompt and file type.
+            """
+            prompt_lower = prompt.lower()
 
+            # Prioritize actions based on file type if present
+            if file_data and file_type and file_type.startswith('image/'):
+                return {"action_type": "analyze_image", "task_description": prompt, "file_data": file_data, "file_type": file_type}
+            elif file_content and (file_type == 'application/pdf' or file_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'):
+                # For PDF/Word, we'll treat it as text analysis for demo.
+                # In real app, you'd extract text here using a library.
+                return {"action_type": "analyze_document", "task_description": prompt, "file_content": file_content, "file_type": file_type}
+            elif file_content: # Generic text file analysis
+                return {"action_type": "analyze_file", "task_description": prompt, "file_content": file_content, "file_type": file_type}
+
+            # Then prioritize actions based on prompt keywords
+            if "general ai" in prompt_lower or "what is" in prompt_lower or "explain" in prompt_lower or "tell me about" in prompt_lower or "define" in prompt_lower:
+                return {"action_type": "general_ai", "task_description": prompt}
+            elif "generate code" in prompt_lower or "write code" in prompt_lower or "code for" in prompt_lower:
+                return {"action_type": "code_generation", "task_description": prompt}
+            elif "debug" in prompt_lower or "fix this code" in prompt_lower or "error in" in prompt_lower:
+                return {"action_type": "debugging", "task_description": prompt}
+            elif "git" in prompt_lower or "commit" in prompt_lower or "push" in prompt_lower or "pull" in prompt_lower:
+                return {"action_type": "git_operation", "task_description": prompt}
+            elif "generate ideas" in prompt_lower or "ideas for" in prompt_lower or "brainstorm" in prompt_lower:
+                return {"action_type": "generate_ideas", "task_description": prompt}
+            else:
+                # Default to general_ai if no specific action is detected and no file is provided
+                return {"action_type": "general_ai", "task_description": prompt}
 
     def tool_executor(self, action_plan):
         """
