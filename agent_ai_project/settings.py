@@ -3,7 +3,7 @@ import datetime # Added for timestamp in memory
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = 'your-secret-key-here' # IMPORTANT: Change this in production!
+SECRET_KEY = 'bcde379ee81f7507e403ed40dbd3e955' # IMPORTANT: Change this in production!
 
 DEBUG = True # Set to False in production
 

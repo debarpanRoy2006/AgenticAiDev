@@ -21,7 +21,7 @@ except ImportError:
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Use an environment variable for SECRET_KEY in production
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'a-very-secret-key-for-local-dev-only')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'bcde379ee81f7507e403ed40dbd3e955')
 
 # Allowed Hosts for Render deployment
 # Render provides a primary external URL (e.g., your-app-name.onrender.com)
