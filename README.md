@@ -1,6 +1,6 @@
 # Agentic AI Development Assistant
 
-![Project Screenshot](docs/screenshot.png) <!-- Optional: Add a screenshot of your working app -->
+
 
 A powerful web-based assistant designed to streamline software development tasks using Agentic AI principles and the Gemini LLM. It features capabilities for code generation, debugging, Git operation simulation, file analysis, idea generation, and a general-purpose AI chat.
 
