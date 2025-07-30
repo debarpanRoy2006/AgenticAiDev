@@ -1,0 +1,27 @@
+# Python
+*.pyc
+__pycache__/
+.Python/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.vscode/ # VS Code specific files
+.idea/ # PyCharm/IntelliJ specific files
+
+# Django
+db.sqlite3
+/media/ # User-uploaded media files (if you implement them)
+/staticfiles/ # Collected static files for production
+.env # Environment variables file
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Render deployment specific (if you have render.yaml in root, this would be in root .gitignore)
+# .render_build_output/
+
+# ChromaDB data (added for persistent client)
+chroma_db_data/
