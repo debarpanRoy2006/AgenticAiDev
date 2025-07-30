@@ -6,7 +6,7 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    settings_module= 'gitTracker.deployment_settings' if 'RENDER_EXTERNAL_HOSTNAME' in os.environ else 'gitTracker.settings'
+    settings_module= 'agent_ai_project.deployment_settings' if 'RENDER_EXTERNAL_HOSTNAME' in os.environ else 'agent_ai_project.settings'
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
     try:
         from django.core.management import execute_from_command_line
